@@ -13,7 +13,7 @@ def get_user_model():
         # Django 1.5+
         from django.contrib.auth import get_user_model
         model = get_user_model()
-    except IOError:
+    except ImportError:
         # Django <= 1.4
         from django.contrib.auth.models import User
         model = User
