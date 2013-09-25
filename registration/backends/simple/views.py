@@ -1,25 +1,30 @@
 from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth import login
-from django.contrib.auth.models import User
 
 from registration import signals
 from registration.views import RegistrationView as BaseRegistrationView
 
+try:
+    from django.contrib.auth import get_user_model
+except ImportError:
+    from django.contrib.auth.models import User
+else:
+    User = get_user_model()
 
 class RegistrationView(BaseRegistrationView):
     """
     A registration backend which implements the simplest possible
-    workflow: a user supplies a username, email address and password
-    (the bare minimum for a useful account), and is immediately signed
+    workflow: a user supplies an email address and password (the
+    bare minimum for a useful account), and is immediately signed
     up and logged in).
     
     """
     def register(self, request, **cleaned_data):
-        username, email, password = cleaned_data['username'], cleaned_data['email'], cleaned_data['password1']
-        User.objects.create_user(username, email, password)
+        email, password = cleaned_data['email'], cleaned_data['password1']
+        User.objects.create_user(email, password)
 
-        new_user = authenticate(username=username, password=password)
+        new_user = authenticate(email=email, password=password)
         login(request, new_user)
         signals.user_registered.send(sender=self.__class__,
                                      user=new_user,
@@ -42,4 +47,4 @@ class RegistrationView(BaseRegistrationView):
         return getattr(settings, 'REGISTRATION_OPEN', True)
 
     def get_success_url(self, request, user):
-        return (user.get_absolute_url(), (), {})
+        return user.get_absolute_url(), (), {}

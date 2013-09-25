@@ -6,10 +6,7 @@ from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
-from registration import signals
-from registration.admin import RegistrationAdmin
 from registration.forms import RegistrationForm
-from registration.backends.default.views import RegistrationView
 from registration.models import RegistrationProfile
 
 from email_user.models import EmailUser as User
@@ -65,8 +62,7 @@ class DefaultBackendViewTests(TestCase):
         self.assertRedirects(resp, reverse('registration_disallowed'))
         
         resp = self.client.post(reverse('registration_register'),
-                                data={'username': 'bob',
-                                      'email': 'bob@example.com',
+                                data={'email': 'bob@example.com',
                                       'password1': 'secret',
                                       'password2': 'secret'})
         self.assertRedirects(resp, reverse('registration_disallowed'))
@@ -94,13 +90,12 @@ class DefaultBackendViewTests(TestCase):
 
         """
         resp = self.client.post(reverse('registration_register'),
-                                data={'username': 'bob',
-                                      'email': 'bob@example.com',
+                                data={'email': 'bob@example.com',
                                       'password1': 'secret',
                                       'password2': 'secret'})
         self.assertRedirects(resp, reverse('registration_complete'))
 
-        new_user = User.objects.get(username='bob')
+        new_user = User.objects.get(email='bob@example.com')
 
         self.failUnless(new_user.check_password('secret'))
         self.assertEqual(new_user.email, 'bob@example.com')
@@ -123,13 +118,12 @@ class DefaultBackendViewTests(TestCase):
         Site._meta.installed = False
 
         resp = self.client.post(reverse('registration_register'),
-                                data={'username': 'bob',
-                                      'email': 'bob@example.com',
+                                data={'email': 'bob@example.com',
                                       'password1': 'secret',
                                       'password2': 'secret'})
         self.assertEqual(302, resp.status_code)
 
-        new_user = User.objects.get(username='bob')
+        new_user = User.objects.get(email='bob@example.com')
 
         self.failUnless(new_user.check_password('secret'))
         self.assertEqual(new_user.email, 'bob@example.com')
@@ -147,8 +141,7 @@ class DefaultBackendViewTests(TestCase):
         
         """
         resp = self.client.post(reverse('registration_register'),
-                                data={'username': 'bob',
-                                      'email': 'bob@example.com',
+                                data={'email': 'bob@example.com',
                                       'password1': 'secret',
                                       'password2': 'notsecret'})
         self.assertEqual(200, resp.status_code)
@@ -161,12 +154,11 @@ class DefaultBackendViewTests(TestCase):
         
         """
         resp = self.client.post(reverse('registration_register'),
-                                data={'username': 'bob',
-                                      'email': 'bob@example.com',
+                                data={'email': 'bob@example.com',
                                       'password1': 'secret',
                                       'password2': 'secret'})
 
-        profile = RegistrationProfile.objects.get(user__username='bob')
+        profile = RegistrationProfile.objects.get(user__email='bob@example.com')
 
         resp = self.client.get(reverse('registration_activate',
                                        args=(),
@@ -179,12 +171,11 @@ class DefaultBackendViewTests(TestCase):
         
         """
         resp = self.client.post(reverse('registration_register'),
-                                data={'username': 'bob',
-                                      'email': 'bob@example.com',
+                                data={'email': 'bob@example.com',
                                       'password1': 'secret',
                                       'password2': 'secret'})
 
-        profile = RegistrationProfile.objects.get(user__username='bob')
+        profile = RegistrationProfile.objects.get(user__email='bob@example.com')
         user = profile.user
         user.date_joined -= datetime.timedelta(days=settings.ACCOUNT_ACTIVATION_DAYS)
         user.save()
@@ -192,6 +183,7 @@ class DefaultBackendViewTests(TestCase):
         resp = self.client.get(reverse('registration_activate',
                                        args=(),
                                        kwargs={'activation_key': profile.activation_key}))
+        print resp.context
 
         self.assertEqual(200, resp.status_code)
         self.assertTemplateUsed(resp, 'registration/activate.html')

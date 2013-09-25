@@ -65,7 +65,7 @@ class RegistrationManager(models.Manager):
                 return user
         return False
     
-    def create_inactive_user(self, username, email, password,
+    def create_inactive_user(self, email, password,
                              site, send_email=True):
         """
         Create a new, inactive ``User``, generate a
@@ -76,7 +76,7 @@ class RegistrationManager(models.Manager):
         user. To disable this, pass ``send_email=False``.
         
         """
-        new_user = get_user_model().objects.create_user(username, email, password)
+        new_user = get_user_model().objects.create_user(email, password)
         new_user.is_active = False
         new_user.save()
 
@@ -95,14 +95,12 @@ class RegistrationManager(models.Manager):
         
         The activation key for the ``RegistrationProfile`` will be a
         SHA1 hash, generated from a combination of the ``User``'s
-        username and a random salt.
+        email and a random salt.
         
         """
         salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
-        username = user.username
-        if isinstance(username, unicode):
-            username = username.encode('utf-8')
-        activation_key = hashlib.sha1(salt+username).hexdigest()
+        email = user.email
+        activation_key = hashlib.sha1(salt+email).hexdigest()
         return self.create(user=user,
                            activation_key=activation_key)
         
@@ -126,7 +124,7 @@ class RegistrationManager(models.Manager):
         Regularly clearing out accounts which have never been
         activated serves two useful purposes:
         
-        1. It alleviates the ocasional need to reset a
+        1. It alleviates the occasional need to reset a
            ``RegistrationProfile`` and/or re-send an activation email
            when a user does not receive or does not act upon the
            initial activation email; since the account will be
@@ -135,8 +133,8 @@ class RegistrationManager(models.Manager):
         
         2. It prevents the possibility of a malicious user registering
            one or more accounts and never activating them (thus
-           denying the use of those usernames to anyone else); since
-           those accounts will be deleted, the usernames will become
+           denying the use of those emails to anyone else); since
+           those accounts will be deleted, the emails will become
            available for use again.
         
         If you have a troublesome ``User`` and wish to disable their

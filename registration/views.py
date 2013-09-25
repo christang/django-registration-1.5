@@ -118,7 +118,8 @@ class ActivationView(TemplateView):
     template_name = 'registration/activate.html'
 
     def get(self, request, *args, **kwargs):
-        activated_user = self.activate(request, *args, **kwargs)
+        activation_key = kwargs.pop('activation_key', None)
+        activated_user = self.activate(request, activation_key)
         if activated_user:
             signals.user_activated.send(sender=self.__class__,
                                         user=activated_user,
@@ -131,7 +132,7 @@ class ActivationView(TemplateView):
                 return redirect(success_url)
         return super(ActivationView, self).get(request, *args, **kwargs)
 
-    def activate(self, request, *args, **kwargs):
+    def activate(self, request, activation_key):
         """
         Implement account-activation logic here.
         

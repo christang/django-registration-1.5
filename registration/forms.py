@@ -8,8 +8,13 @@ you're using a custom model.
 
 """
 
+try:
+    from django.contrib.auth import get_user_model
+except ImportError:
+    from django.contrib.auth.models import User
+else:
+    User = get_user_model()
 
-from django.contrib.auth.models import User
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
@@ -28,32 +33,26 @@ class RegistrationForm(forms.Form):
 
     """
     required_css_class = 'required'
-    
-    username = forms.RegexField(regex=r'^[\w.@+-]+$',
-                                max_length=30,
-                                label=_("Username"),
-                                error_messages={'invalid': _("This value may contain only letters, numbers and @/./+/-/_ characters.")})
+
     email = forms.EmailField(label=_("E-mail"))
     password1 = forms.CharField(widget=forms.PasswordInput,
                                 label=_("Password"))
     password2 = forms.CharField(widget=forms.PasswordInput,
                                 label=_("Password (again)"))
     
-    def clean_username(self):
+    def clean_email(self):
         """
-        Validate that the username is alphanumeric and is not already
-        in use.
-        
+        Validate that the supplied email address is unique for the
+        site.
+
         """
-        existing = User.objects.filter(username__iexact=self.cleaned_data['username'])
-        if existing.exists():
-            raise forms.ValidationError(_("A user with that username already exists."))
-        else:
-            return self.cleaned_data['username']
+        if User.objects.filter(email__iexact=self.cleaned_data['email']):
+            raise forms.ValidationError(_("This email address is already in use. Please supply a different email address."))
+        return self.cleaned_data['email']
 
     def clean(self):
         """
-        Verifiy that the values entered into the two password fields
+        Verify that the values entered into the two password fields
         match. Note that an error here will end up in
         ``non_field_errors()`` because it doesn't apply to a single
         field.
@@ -74,23 +73,6 @@ class RegistrationFormTermsOfService(RegistrationForm):
     tos = forms.BooleanField(widget=forms.CheckboxInput,
                              label=_(u'I have read and agree to the Terms of Service'),
                              error_messages={'required': _("You must agree to the terms to register")})
-
-
-class RegistrationFormUniqueEmail(RegistrationForm):
-    """
-    Subclass of ``RegistrationForm`` which enforces uniqueness of
-    email addresses.
-    
-    """
-    def clean_email(self):
-        """
-        Validate that the supplied email address is unique for the
-        site.
-        
-        """
-        if User.objects.filter(email__iexact=self.cleaned_data['email']):
-            raise forms.ValidationError(_("This email address is already in use. Please supply a different email address."))
-        return self.cleaned_data['email']
 
 
 class RegistrationFormNoFreeEmail(RegistrationForm):
