@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from email_user.models import EmailUser as User
 from django.test import TestCase
 
 from registration import forms

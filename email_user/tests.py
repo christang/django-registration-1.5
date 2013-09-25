@@ -37,4 +37,4 @@ class SimpleTest(TestCase):
 
     def test_cannot_create_user_with_same_email(self):
         email, p, u = self.create_user()
-        self.assertRaises(IntegrityError, EmailUser.create_user, email)
+        self.assertRaises(IntegrityError, EmailUser.objects.create_user, email)

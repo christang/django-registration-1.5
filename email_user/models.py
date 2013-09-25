@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import BaseUserManager, Group, AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
 from django.utils.http import urlquote
+from django.utils.translation import ugettext_lazy as _
 
 
 MAX_EMAIL_LENGTH = 254
@@ -102,7 +103,6 @@ class EmailUser(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
     class Meta:
-        app_label = 'profiles'
         verbose_name = _('user')
         verbose_name_plural = _('users')
 

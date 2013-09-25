@@ -1,10 +1,10 @@
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from registration.forms import RegistrationForm
 
+from email_user.models import EmailUser as User
 
 class SimpleBackendViewTests(TestCase):
     urls = 'registration.backends.simple.urls'
