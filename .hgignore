@@ -1,5 +1,6 @@
 syntax: glob
 *.pyc
+*.idea
 dist
 MANIFEST
 _build
