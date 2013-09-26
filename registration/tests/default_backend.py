@@ -183,7 +183,6 @@ class DefaultBackendViewTests(TestCase):
         resp = self.client.get(reverse('registration_activate',
                                        args=(),
                                        kwargs={'activation_key': profile.activation_key}))
-        print resp.context
 
         self.assertEqual(200, resp.status_code)
         self.assertTemplateUsed(resp, 'registration/activate.html')
