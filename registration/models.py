@@ -158,6 +158,11 @@ class RegistrationManager(models.Manager):
                 profile.delete()
 
 
+# If a project wants to extend RegistrationProfile, then it doesn't want
+# concrete implementation. We add an abstract layer here so that the
+# implementer can extend this rather than extend a concrete class, which
+# is bad because it can destroy the performance of the database.
+
 class AbstractRegistrationProfile(models.Model):
     """
     A simple profile which stores an activation key for use during
