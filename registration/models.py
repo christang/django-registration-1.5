@@ -173,7 +173,7 @@ class AbstractRegistrationProfile(models.Model):
     ``AUTH_PROFILE_MODULE`` setting, it's not recommended that you do
     so. This model's sole purpose is to store data temporarily during
     account registration and activation.
-    
+
     """
     ACTIVATED = u"ALREADY_ACTIVATED"
     
@@ -269,5 +269,10 @@ class AbstractRegistrationProfile(models.Model):
         self.user.email_user(subject, message, settings.DEFAULT_FROM_EMAIL)
     
 
-class RegistrationProfile(AbstractRegistrationProfile):
-    """ Makes the AbstractRegistrationProfile above concrete. """
+# Here we assume if the registration app is in the settings INSTALLED_APPS, then
+# the project needs a concrete implementation for RegistrationProfile, so we add
+# one. Otherwise, we assume it doesn't want one, so we don't add it.
+
+if 'registration' in settings.INSTALLED_APPS:
+    class RegistrationProfile(AbstractRegistrationProfile):
+        """ Makes the AbstractRegistrationProfile above concrete. """
