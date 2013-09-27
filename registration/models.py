@@ -157,10 +157,12 @@ class RegistrationManager(models.Manager):
             except get_user_model().DoesNotExist:
                 profile.delete()
 
-class RegistrationProfile(models.Model):
+
+class AbstractRegistrationProfile(models.Model):
     """
     A simple profile which stores an activation key for use during
-    user account registration.
+    user account registration. An abstract layer is introduced to
+    allow external implementers to extend this model.
     
     Generally, you will not want to interact directly with instances
     of this model; the provided manager includes methods
@@ -181,6 +183,7 @@ class RegistrationProfile(models.Model):
     objects = RegistrationManager()
     
     class Meta:
+        abstract = True
         verbose_name = _('registration profile')
         verbose_name_plural = _('registration profiles')
     
@@ -265,3 +268,6 @@ class RegistrationProfile(models.Model):
         
         self.user.email_user(subject, message, settings.DEFAULT_FROM_EMAIL)
     
+
+class RegistrationProfile(AbstractRegistrationProfile):
+    """ Makes the AbstractRegistrationProfile above concrete. """
