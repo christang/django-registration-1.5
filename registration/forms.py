@@ -12,8 +12,7 @@ try:
     from django.contrib.auth import get_user_model
 except ImportError:
     from django.contrib.auth.models import User
-else:
-    User = get_user_model()
+    get_user_model = lambda: User
 
 from django import forms
 from django.utils.translation import ugettext_lazy as _
@@ -46,7 +45,7 @@ class RegistrationForm(forms.Form):
         site.
 
         """
-        if User.objects.filter(email__iexact=self.cleaned_data['email']):
+        if get_user_model().objects.filter(email__iexact=self.cleaned_data['email']):
             raise forms.ValidationError(_("This email address is already in use. Please supply a different email address."))
         return self.cleaned_data['email']
 
